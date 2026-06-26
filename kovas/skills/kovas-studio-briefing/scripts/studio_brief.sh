@@ -70,6 +70,33 @@ $(find "$scan" -type f -not -path '*/.*' -print0 2>/dev/null | xargs -0 ls -t 2>
 EOF
 [ "$found_recent" -eq 0 ] && print_line "  (none)"
 
+# Development slate snapshot (film/TV side) — distinct from scoring projects.
+# Looks for a Development/ area; lists projects and their one-line status if a
+# SLATE.md / logline is present. Read-only.
+dev_dir=""
+for cand in "$root/Development" "$root/Dev" "$root/Slate"; do
+  [ -d "$cand" ] && { dev_dir="$cand"; break; }
+done
+if [ -n "$dev_dir" ]; then
+  print_line ""
+  print_line "── Development slate ──"
+  dev_count="$(ls -d "$dev_dir"/*/ 2>/dev/null | wc -l | tr -d ' ')"
+  print_line "  Projects in development: ${dev_count}"
+  # Most-recent few, with status line from SLATE.md if present.
+  for d in $(ls -dt "$dev_dir"/*/ 2>/dev/null | head -4); do
+    name="$(basename "$d")"
+    status=""
+    for sf in "$d/SLATE.md" "$d/STATUS.md" "$d/LOGLINE.md"; do
+      [ -f "$sf" ] && { status="$(sed -n '1,1p' "$sf" 2>/dev/null | cut -c1-80)"; break; }
+    done
+    if [ -n "$status" ]; then
+      print_line "  • ${name} — ${status}"
+    else
+      print_line "  • ${name}"
+    fi
+  done
+fi
+
 # Surface small status notes if the project keeps them (capped, read-only).
 print_line ""
 print_line "── Notes / TODO / delivery status ──"

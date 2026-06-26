@@ -30,7 +30,12 @@ keep `hermes update` + upstream improvements to the self-improving skills loop.
 | `skills/kovas-stem-naming/` | `~/.hermes/skills/kovas-stem-naming/` | Stem/cue naming convention (starter — edit to your real spec) |
 | `skills/kovas-delivery-checklist/` | `~/.hermes/skills/kovas-delivery-checklist/` | Pre-delivery QC pre-flight |
 | `skills/kovas-cue-tracking/` | `~/.hermes/skills/kovas-cue-tracking/` | Cue list + revision/notes tracking |
+| `skills/kovas-dev-tracking/` | `~/.hermes/skills/kovas-dev-tracking/` | Film/TV development slate tracking (the "second development lead" role) |
 | `context/AGENTS.md` | `~/Studio/AGENTS.md` | Static studio vocabulary/structure, auto-injected when cwd is the studio |
+
+**Identity:** the agent is **Marlowe** (rename in `SOUL.md`) — a blended score
+coordinator + studio archivist + second development lead. The briefing covers
+both the scoring floor (`Projects/`) and the development slate (`Development/`).
 
 The briefing is wired in `SOUL.md` ("Start of every session — no cold starts").
 Set `KOVAS_STUDIO_ROOT` in `~/.hermes/.env` if the studio isn't at `~/Studio`.
