@@ -22,6 +22,22 @@ keep `hermes update` + upstream improvements to the self-improving skills loop.
 | `skills/kovas-nda/SKILL.md` | `~/.hermes/skills/kovas-nda/SKILL.md` | User-authored NDA rules (curator never edits it) |
 | `kovas-build-spec.md` | (reference) | The corrected build plan |
 
+### Milestone 2 — studio context (no cold starts)
+
+| Bundle file | Destination on M1 | Notes |
+|---|---|---|
+| `skills/kovas-studio-briefing/` | `~/.hermes/skills/kovas-studio-briefing/` | Session opener: runs `scripts/studio_brief.sh`, agent leads with a live status briefing |
+| `skills/kovas-stem-naming/` | `~/.hermes/skills/kovas-stem-naming/` | Stem/cue naming convention (starter — edit to your real spec) |
+| `skills/kovas-delivery-checklist/` | `~/.hermes/skills/kovas-delivery-checklist/` | Pre-delivery QC pre-flight |
+| `skills/kovas-cue-tracking/` | `~/.hermes/skills/kovas-cue-tracking/` | Cue list + revision/notes tracking |
+| `context/AGENTS.md` | `~/Studio/AGENTS.md` | Static studio vocabulary/structure, auto-injected when cwd is the studio |
+
+The briefing is wired in `SOUL.md` ("Start of every session — no cold starts").
+Set `KOVAS_STUDIO_ROOT` in `~/.hermes/.env` if the studio isn't at `~/Studio`.
+The workflow skills are **starter templates** — they encode sensible film/TV
+defaults with "edit me" markers, and the self-improvement loop refines them as
+you correct them in real sessions.
+
 ## Two-line code hook (the only source edit)
 In `agent/file_safety.py`, delegate to the guard at the existing chokepoints
 (full instructions in the header of `nda_guard.py`):

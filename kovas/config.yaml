@@ -11,6 +11,9 @@
 #
 # Secrets (TELEGRAM_BOT_TOKEN, BLUEBUBBLES_URL/PASSWORD, OPENROUTER_API_KEY,
 # any DGX endpoint token) live in ~/.hermes/.env — never in this file.
+#
+# Set KOVAS_STUDIO_ROOT in ~/.hermes/.env if your studio isn't at ~/Studio;
+# the briefing skill and NDA allowlist both key off it.
 # ============================================================================
 
 # ---- Primary brain ---------------------------------------------------------
@@ -108,6 +111,13 @@ compression:
   enabled: true
   threshold: 0.50
   target_ratio: 0.20
+
+# ---- Skills ----------------------------------------------------------------
+# inline_shell lets a SKILL.md embed live data via !`cmd` (4000-char cap).
+# The kovas-studio-briefing skill uses it for a zero-tool-call briefing; it also
+# works via a normal terminal call, so this is optional but nicer.
+skills:
+  inline_shell: true
 
 # ---- Self-improvement (the part you keep no matter what) -------------------
 curator:
