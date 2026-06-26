@@ -6,6 +6,69 @@ seamlessly. Nothing here requires you to have seen the prior chats.
 
 ---
 
+## ⏱ First 30 minutes (runbook)
+
+Exact order of operations for your first session. **Nothing here writes to the
+studio.** Steps marked 🧍 need KOVAS in the loop — pause and ask, don't guess.
+
+```bash
+# 1. ORIENT — get the bundle onto the M1 (read-only so far)
+git clone https://github.com/KOVAS-ASR/herm.git ~/herm 2>/dev/null || true
+cd ~/herm && git fetch origin
+git checkout claude/m1-agent-harness-setup-dzyohe
+git pull origin claude/m1-agent-harness-setup-dzyohe
+#  → then read kovas/HANDOFF.md (this file) and kovas/README.md in full.
+
+# 2. 🧍 DISCOVER THE REAL VAULT LAYOUT — do NOT assume ~/Studio/Projects.
+STUDIO="${KOVAS_STUDIO_ROOT:-$HOME/Studio}"   # ask KOVAS for the real path
+ls -la "$STUDIO"
+ls -d "$STUDIO"/*/ 2>/dev/null                # confirm Projects/ + Development/ (or his names)
+#  → Confirm with KOVAS. If the layout differs, you'll adjust studio_brief.sh,
+#    context/AGENTS.md, and nda.allowed_paths to match BEFORE installing.
+
+# 3. DRY-RUN THE BRIEFING against the real vault (safe — read-only bash)
+KOVAS_STUDIO_ROOT="$STUDIO" bash kovas/skills/kovas-studio-briefing/scripts/studio_brief.sh
+#  → It should print a real briefing. If it's empty/wrong, fix the script's
+#    path assumptions first. This is the single highest-leverage check.
+
+# 4. BACK UP any existing Hermes config, then place the bundle
+cp ~/.hermes/config.yaml ~/.hermes/config.yaml.bak 2>/dev/null || true
+#  If ~/.hermes/config.yaml already exists and is in use, MERGE the kovas blocks
+#  (model/endpoints/auxiliary/toolsets/nda/skills/curator/gateway) instead of
+#  overwriting. Otherwise:
+cp kovas/config.yaml ~/.hermes/config.yaml
+cp kovas/SOUL.md     ~/.hermes/SOUL.md
+mkdir -p ~/.hermes/skills && cp -R kovas/skills/* ~/.hermes/skills/
+cp kovas/nda_guard.py ~/.hermes/hermes-agent/agent/nda_guard.py
+cp kovas/context/AGENTS.md "$STUDIO/AGENTS.md"
+
+# 5. THE ONE SOURCE EDIT — wire the NDA guard into file_safety.py
+#  Open ~/.hermes/hermes-agent/agent/file_safety.py and add the two delegations
+#  documented at the top of kovas/nda_guard.py (get_read_block_error →
+#  nda_read_block_error; is_write_denied → nda_write_denied). Then confirm:
+grep -n "nda_read_block_error\|nda_write_denied" ~/.hermes/hermes-agent/agent/file_safety.py
+python3 -m py_compile ~/.hermes/hermes-agent/agent/nda_guard.py && echo "guard compiles"
+
+# 6. 🧍 SECRETS + ENDPOINTS (get values from KOVAS; never commit these)
+#  Edit ~/.hermes/.env:  TELEGRAM_BOT_TOKEN, BLUEBUBBLES_URL, BLUEBUBBLES_PASSWORD,
+#  OPENROUTER_API_KEY, KOVAS_STUDIO_ROOT (if not ~/Studio).
+#  Edit ~/.hermes/config.yaml endpoints: the LM Studio port + DGX Spark host.
+
+# 7. VERIFY
+hermes doctor
+#  In a session: confirm Marlowe OPENS with a briefing (not a greeting), then
+#  confirm read-only — ask it to write a test file inside the studio (must be
+#  DENIED) and inside ~/.hermes (must be ALLOWED).
+```
+
+**Then report to KOVAS** against the success metric: does the opening briefing
+tell him what changed / what's owed / what's missing / what needs cleanup? If
+yes, it's earning its keep. If the briefing is hollow, fix the vault-path
+assumptions before adding anything else. **Confirm the name "Marlowe"** and the
+parked milestones (§8) before building further.
+
+---
+
 ## 0. TL;DR (read this first)
 
 KOVAS is building a **one-person, AI-first film & TV studio** with music
