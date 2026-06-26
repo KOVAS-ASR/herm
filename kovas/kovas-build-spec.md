@@ -147,6 +147,32 @@ rules the curator won't touch).
 
 ---
 
+## 6.5 Phase-1 discipline (the council's verdict, encoded)
+
+Every advisor landed on the same shape: **proceed, but make v1 boring.** This
+is enforced, not aspirational:
+
+- **Read-only studio.** `nda.read_only: true` — the agent reads, briefs, and
+  recommends; it does not write/move/delete in the studio. Enforced in
+  `nda_guard.py`, not via toolset selection (architecture > config: a config
+  slip can't silently grant writes). Self-improvement still works because
+  `~/.hermes` stays writable.
+- **No cloud for protected work.** Default + curator + all auxiliary models are
+  local. OpenRouter is opt-in per message and never for NDA material.
+- **No DAW control, no destructive actions, no orchestration in v1.**
+
+**Success metric (one week):** the agent should save 20–30 min/session by
+telling KOVAS what changed, what's due, what's missing, and what needs cleanup.
+If it can't do that cleanly, don't expand it.
+
+**Pre-mortem / kill-rule:** the failure mode is spending more time maintaining
+the agent than it saves. Watch it. Hard rule: **if upkeep exceeds ~2 hrs/week,
+cut scope.** Start with the smallest skill set and let the self-improvement
+loop add skills organically rather than pre-building them.
+
+**Promotion gate to Phase 2 (writes):** flip `read_only` to false only after
+the briefing + read-only QC have proven reliable over real sessions.
+
 ## 7. What this is NOT
 
 This spec gets you a lean, private, self-improving local agent on the Mac Mini.

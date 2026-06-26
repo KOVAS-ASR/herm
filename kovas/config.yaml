@@ -127,18 +127,29 @@ curator:
   archive_after_days: 90
 
 # ---- NDA-safe file handling (see kovas/nda_guard.py) -----------------------
+# Phase 1 is deliberately "boring" (the council's unanimous call): the agent
+# READS the studio, briefs, and recommends — it does NOT write to it. Flip
+# read_only to false only once it has earned trust. This boundary is enforced
+# in the guard itself, so a toolset/config slip can't silently grant writes.
 nda:
   enabled: true
+  read_only: true            # Phase 1: read the studio, never write to it
   allowed_paths:
     - "~/Studio"             # the studio sandbox the agent works in
     - "~/projects/kovas"
-    - "~/.hermes"            # agent's own home, so it can self-improve
+    - "~/.hermes"            # agent's own home, so it can self-improve (writable even in read_only)
   blocked_patterns:
     - "*.nda"
     - "*/confidential/*"
     - "*/clients/*/contracts/*"
   audit_log: true            # ~/.hermes/nda_audit.log
   audit_reads: true
+
+# PROTECTED-WORK ROUTING PRINCIPLE (Phase 1): anything touching client/NDA
+# material stays on LOCAL models only (ollama / lmstudio / dgx). OpenRouter is
+# wired above for NON-sensitive frontier work and is opt-in per message via
+# /model — never the default, never for protected material. See the kovas-nda
+# skill, which the agent must consult before any cloud call.
 
 # ---- TTS -------------------------------------------------------------------
 tts:

@@ -101,6 +101,24 @@ def _enabled() -> bool:
     return bool(_cfg().get("enabled"))
 
 
+def _read_only() -> bool:
+    """Phase-1 'boring' posture: the agent may READ the studio but never WRITE
+    to it. Enforced here in the guard (architecture), not via toolset selection
+    (configuration) — a config slip can't silently grant write access to the
+    studio. Writes to the agent's own ~/.hermes home are still allowed so the
+    self-improvement loop (skills/memory) keeps working."""
+    return bool(_cfg().get("read_only"))
+
+
+def _hermes_home() -> Path:
+    try:
+        from hermes_constants import get_hermes_home
+
+        return Path(get_hermes_home()).resolve()
+    except Exception:
+        return Path(os.path.expanduser("~/.hermes")).resolve()
+
+
 def _allowed_roots() -> list[Path]:
     roots: list[Path] = []
     for raw in _cfg().get("allowed_paths", []) or []:
@@ -204,6 +222,24 @@ def _verdict(path: str, mode: str) -> Optional[str]:
             f"NDA guard: '{path}' is outside the allowed project directories. "
             f"Add its root to nda.allowed_paths if this access is intended."
         )
+    # Phase-1 read-only: deny writes to the studio, but always permit the agent
+    # to write inside its own ~/.hermes home (skills, memory, audit log).
+    if mode == "write" and _read_only():
+        home = _hermes_home()
+        within_home = False
+        try:
+            resolved.relative_to(home)
+            within_home = True
+        except ValueError:
+            within_home = False
+        if not within_home:
+            _audit(str(resolved), mode, allowed=False)
+            return (
+                f"NDA guard: read-only mode is on (Phase 1). '{path}' is inside "
+                f"the studio and cannot be written. Read, brief, and recommend "
+                f"the change for KOVAS to make — or set nda.read_only: false to "
+                f"enable writes once you trust the agent."
+            )
     _audit(str(resolved), mode, allowed=True)
     return None
 
