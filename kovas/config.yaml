@@ -1,0 +1,165 @@
+# ============================================================================
+# KOVAS — local-first Hermes profile (M1 Mac Mini)
+# ============================================================================
+# Goes at:  ~/.hermes/config.yaml   (or ~/.hermes/profiles/kovas/config.yaml
+#           if you run it as a named profile: `hermes --profile kovas`)
+#
+# Philosophy: CONFIGURE, don't fork. Unused providers/platforms/tools in the
+# stock Hermes tree are inert (dynamic discovery + lazy imports), so we select
+# what's on rather than deleting files. This keeps `hermes update` working and
+# keeps the self-improving skills loop getting upstream fixes.
+#
+# Secrets (TELEGRAM_BOT_TOKEN, BLUEBUBBLES_URL/PASSWORD, OPENROUTER_API_KEY,
+# any DGX endpoint token) live in ~/.hermes/.env — never in this file.
+#
+# Set KOVAS_STUDIO_ROOT in ~/.hermes/.env if your studio isn't at ~/Studio;
+# the briefing skill and NDA allowlist both key off it.
+# ============================================================================
+
+# ---- Primary brain ---------------------------------------------------------
+# Day-to-day interactive model. Local by default. The `custom` provider speaks
+# OpenAI-compatible and covers ollama / vllm / llamacpp, so the SAME provider
+# block points at Ollama, LM Studio, or the DGX Spark just by changing base_url.
+model:
+  provider: "custom"
+  base_url: "http://localhost:11434/v1"   # Ollama on the Mac Mini
+  default: "qwen3:32b"                      # swap for your preferred local model
+
+# ---- The model fleet -------------------------------------------------------
+# Named endpoints you switch between with `/model <name>`. This is the
+# correction to Search's "Ollama only" spec — your real fleet is four tiers.
+endpoints:
+  ollama:                                   # fast / always-on, Mac Mini
+    provider: "custom"
+    base_url: "http://localhost:11434/v1"
+    default: "qwen3:8b"
+  lmstudio:                                 # Gemma in LM Studio — smarter local chat
+    provider: "custom"
+    base_url: "http://localhost:1234/v1"
+    default: "gemma-3-27b"                   # set to whatever you loaded in LM Studio
+  dgx:                                      # the heavy local box — big models, private
+    provider: "custom"
+    base_url: "http://DGX-SPARK-HOST:8000/v1"  # vLLM / Ollama / NIM endpoint
+    default: "llama-3.3-70b"
+  openrouter:                               # deliberate cloud escape hatch (frontier)
+    provider: "openrouter"
+    # OPENROUTER_API_KEY in ~/.hermes/.env
+    default: "anthropic/claude-3.7-sonnet"
+
+# ---- Auxiliary models ------------------------------------------------------
+# Vision / compression / titles / curator. NOTE the curator: this is the
+# self-improvement reviewer, and it writes BETTER skills with a stronger model.
+# Point it at the DGX Spark so the crown-jewel loop is well-fed *without*
+# leaving your network.
+auxiliary:
+  vision:
+    provider: "custom"
+    base_url: "http://localhost:11434/v1"
+    model: "llama3.2-vision:11b"
+  compression:
+    provider: "custom"
+    base_url: "http://localhost:11434/v1"
+    model: "qwen3:8b"
+  title_generation:
+    provider: "custom"
+    base_url: "http://localhost:11434/v1"
+    model: "qwen3:8b"
+  curator:
+    provider: "custom"
+    base_url: "http://DGX-SPARK-HOST:8000/v1"   # strong model feeds the learning loop
+    model: "llama-3.3-70b"
+
+# ---- Tools -----------------------------------------------------------------
+# Curated toolset list. Everything not listed simply isn't offered to the
+# model — no file deletion required. Add/remove with `hermes tools`.
+toolsets:
+  - "file"            # read_file / write_file / patch / search_files
+  - "terminal"        # local shell (keep approval ON — see below)
+  - "memory"          # MEMORY.md + USER.md
+  - "skills"          # skills_list / skill_view / skill_manage  (crown jewel)
+  - "session_search"  # FTS5 recall across past sessions
+  - "todo"
+  - "clarify"
+  - "send_message"    # cross-platform replies via the gateway
+  - "tts"             # voice replies
+  - "vision"          # image understanding (local vision model above)
+  # Intentionally OFF for the local-first profile (turn on per need):
+  #   web, browser, image_generation, video_generation, mcp, delegate,
+  #   mixture_of_agents, computer_use, kanban
+
+agent:
+  max_turns: 90
+  gateway_timeout: 1800
+  image_input_mode: "auto"
+
+# ---- Execution backend -----------------------------------------------------
+terminal:
+  backend: "local"
+  timeout: 180
+
+# ---- Command approval = your NDA seatbelt ----------------------------------
+# Keep this ON. The terminal tool is the one surface nda_guard does NOT cover,
+# so destructive/wide-reach commands should prompt. YOLO mode is frozen at
+# import in approval.py specifically so a rogue skill can't silently disable
+# it — leave HERMES_YOLO_MODE unset.
+approval:
+  enabled: true
+  smart_approval: true     # auto-clears obviously-safe commands (ls, git status)
+
+# ---- Context compression ---------------------------------------------------
+compression:
+  enabled: true
+  threshold: 0.50
+  target_ratio: 0.20
+
+# ---- Skills ----------------------------------------------------------------
+# inline_shell lets a SKILL.md embed live data via !`cmd` (4000-char cap).
+# The kovas-studio-briefing skill uses it for a zero-tool-call briefing; it also
+# works via a normal terminal call, so this is optional but nicer.
+skills:
+  inline_shell: true
+
+# ---- Self-improvement (the part you keep no matter what) -------------------
+curator:
+  enabled: true
+  interval_hours: 168      # weekly
+  stale_after_days: 30
+  archive_after_days: 90
+
+# ---- NDA-safe file handling (see kovas/nda_guard.py) -----------------------
+# Phase 1 is deliberately "boring" (the council's unanimous call): the agent
+# READS the studio, briefs, and recommends — it does NOT write to it. Flip
+# read_only to false only once it has earned trust. This boundary is enforced
+# in the guard itself, so a toolset/config slip can't silently grant writes.
+nda:
+  enabled: true
+  read_only: true            # Phase 1: read the studio, never write to it
+  allowed_paths:
+    - "~/Studio"             # the studio sandbox the agent works in
+    - "~/projects/kovas"
+    - "~/.hermes"            # agent's own home, so it can self-improve (writable even in read_only)
+  blocked_patterns:
+    - "*.nda"
+    - "*/confidential/*"
+    - "*/clients/*/contracts/*"
+  audit_log: true            # ~/.hermes/nda_audit.log
+  audit_reads: true
+
+# PROTECTED-WORK ROUTING PRINCIPLE (Phase 1): anything touching client/NDA
+# material stays on LOCAL models only (ollama / lmstudio / dgx). OpenRouter is
+# wired above for NON-sensitive frontier work and is opt-in per message via
+# /model — never the default, never for protected material. See the kovas-nda
+# skill, which the agent must consult before any cloud call.
+
+# ---- TTS -------------------------------------------------------------------
+tts:
+  provider: "edge"           # free, no key; swap to "piper" for fully-local
+  voice: "en-US-AriaNeural"
+
+# ---- Messaging (tokens in ~/.hermes/.env) ----------------------------------
+# Telegram + iMessage(BlueBubbles) are the two platforms you actually use.
+# The gateway only starts adapters you configure; the other ~26 stay dormant.
+gateway:
+  platforms:
+    - "telegram"
+    - "bluebubbles"
