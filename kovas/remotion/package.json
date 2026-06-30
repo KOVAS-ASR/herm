@@ -1,0 +1,22 @@
+{
+  "name": "kovas-studio-remotion",
+  "version": "1.0.0",
+  "description": "KOVAS studio motion-graphics templates (Remotion) — cue title cards and lower-thirds driven by Marlowe's cue/slate data.",
+  "private": true,
+  "scripts": {
+    "studio": "remotion studio",
+    "render": "remotion render",
+    "still": "remotion still"
+  },
+  "dependencies": {
+    "@remotion/cli": "^4.0.0",
+    "react": "^18.3.1",
+    "react-dom": "^18.3.1",
+    "remotion": "^4.0.0",
+    "zod": "^3.25.76"
+  },
+  "devDependencies": {
+    "@types/react": "^18.3.1",
+    "typescript": "^5.5.4"
+  }
+}

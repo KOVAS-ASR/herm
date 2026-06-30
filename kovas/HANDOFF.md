@@ -249,6 +249,10 @@ code change to merge into the running tree. Stock Hermes lives at
      hook exists at `agent/conversation_loop.py`).
    - DAW/SoundFlow studio-control layer (Ableton MCP + SoundFlow scripting).
    - Model routing by task complexity (small-local → DGX → cloud).
+   - **Remotion motion graphics** (`kovas/remotion` + `kovas-remotion` skill):
+     cue title cards / lower-thirds / data-driven renders from cue/slate JSON.
+     Scaffolded and render-verified (stills + MP4). Renders are WRITES → output
+     to a scratch dir outside the read-only studio; all rendering local (NDA).
 
 ## 9. Guardrails for YOU (the M1 agent)
 
