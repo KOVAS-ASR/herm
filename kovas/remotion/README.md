@@ -8,6 +8,23 @@ tracks. React in, broadcast-spec PNG/MP4 out. No After Effects.
 - **`CueTitleCard`** — show/episode, cue number, title, composer. 1920×1080,
   24fps, transparent background (alpha) so it sits over picture.
 - **`LowerThird`** — name + role chip with accent rule.
+- **`CueReel`** — every cue in a `cue-list.json` as title cards back-to-back, in
+  one render. Duration scales with the cue count.
+- **`EndCredits`** — a scrolling end-credit crawl listing every cue.
+
+## Brand kit (`src/brand.ts`)
+Typography + palette live in one file. **Offline-first by design** — the
+defaults are pure CSS font stacks (no network fetch at render time), so a local
+NDA studio renders deterministically. Install/self-host the brand face (or use
+`@remotion/google-fonts`, which needs network egress) to upgrade — see "Fonts".
+
+### Fonts
+Default = system stacks (`Archivo`/`Inter` first, clean fallbacks). To pin the
+exact brand face while staying offline: drop the `.woff2` in `public/`, add an
+`@font-face` in a `src/fonts.css`, import it from `src/index.ts`, and keep the
+family name first in `brand.ts`'s stacks. Online alternative:
+`import { loadFont } from "@remotion/google-fonts/Archivo"` (requires
+`fonts.gstatic.com` egress; will fail behind a strict allowlist or offline).
 
 Props are validated by a Zod schema (`src/CueTitleCard.tsx`,
 `src/LowerThird.tsx`), so the Remotion Studio shows a live props editor and
@@ -27,6 +44,13 @@ npx remotion still CueTitleCard out/title.png --frame=60 \
 # Video (defaults to H.264; see remotion.config.ts for ProRes/alpha delivery)
 npx remotion render CueTitleCard out/title.mp4 \
   --props=./src/props/example-cue.json
+
+# Whole CUES.md → one reel, or an end-credit crawl
+npx remotion render CueReel    out/reel.mp4    --props=./src/props/cue-list.json
+npx remotion render EndCredits out/credits.mp4 --props=./src/props/cue-list.json
+
+# Batch: one PNG per cue (output dir OUTSIDE the read-only studio)
+node scripts/render-cue-cards.mjs src/props/cue-list.json ~/renders/cards
 ```
 
 ### Headless rendering (servers / CI / this cloud env)

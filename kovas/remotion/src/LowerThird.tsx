@@ -7,6 +7,7 @@ import {
   useVideoConfig,
 } from "remotion";
 import { z } from "zod";
+import { displayFont, bodyFont, palette } from "./brand";
 
 export const lowerThirdSchema = z.object({
   name: z.string(),
@@ -32,7 +33,7 @@ export const LowerThird: React.FC<LowerThirdProps> = ({
         justifyContent: "flex-end",
         alignItems: "flex-start",
         padding: 140,
-        fontFamily: "Helvetica, Arial, sans-serif",
+        fontFamily: bodyFont,
       }}
     >
       <div style={{ transform: `translateX(${x}px)` }}>
@@ -44,12 +45,17 @@ export const LowerThird: React.FC<LowerThirdProps> = ({
             padding: "18px 28px",
           }}
         >
-          <div style={{ color: "white", fontSize: 52, fontWeight: 700 }}>
+          <div
+            style={{
+              color: palette.text,
+              fontSize: 52,
+              fontWeight: 900,
+              fontFamily: displayFont,
+            }}
+          >
             {name}
           </div>
-          <div style={{ color: accent, fontSize: 28, marginTop: 6 }}>
-            {role}
-          </div>
+          <div style={{ color: accent, fontSize: 28, marginTop: 6 }}>{role}</div>
         </div>
       </div>
     </AbsoluteFill>

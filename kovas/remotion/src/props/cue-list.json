@@ -1,0 +1,13 @@
+{
+  "show": "NIGHTFALL",
+  "episode": "S2E04",
+  "composer": "KOVAS",
+  "accent": "#E5B567",
+  "cues": [
+    { "cueNumber": "1m05", "cueTitle": "Main Title" },
+    { "cueNumber": "1m12", "cueTitle": "The Drive North" },
+    { "cueNumber": "2m04", "cueTitle": "Chase" },
+    { "cueNumber": "2m18", "cueTitle": "What She Knew" },
+    { "cueNumber": "3m02", "cueTitle": "Resolution / End Credits" }
+  ]
+}

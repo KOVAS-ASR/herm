@@ -7,6 +7,7 @@ import {
   useVideoConfig,
 } from "remotion";
 import { z } from "zod";
+import { displayFont, bodyFont, palette } from "./brand";
 
 // Schema = the contract Marlowe fills from cue data (CUES.md / a cue JSON).
 // Keeping it as a Zod schema lets the Remotion Studio render a props editor and
@@ -57,7 +58,7 @@ export const CueTitleCard: React.FC<CueTitleProps> = ({
         backgroundColor: "transparent",
         justifyContent: "center",
         paddingLeft: 160,
-        fontFamily: "Helvetica, Arial, sans-serif",
+        fontFamily: bodyFont,
         opacity: outOpacity,
       }}
     >
@@ -80,12 +81,19 @@ export const CueTitleCard: React.FC<CueTitleProps> = ({
             margin: "24px 0",
           }}
         />
-        <div style={{ color: "white", fontSize: 96, fontWeight: 700 }}>
+        <div
+          style={{
+            color: palette.text,
+            fontSize: 96,
+            fontWeight: 900,
+            fontFamily: displayFont,
+          }}
+        >
           {cueTitle}
         </div>
         <div
           style={{
-            color: "rgba(255,255,255,0.7)",
+            color: palette.textMuted,
             fontSize: 34,
             marginTop: 18,
             letterSpacing: 2,

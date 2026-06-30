@@ -11,8 +11,10 @@ metadata:
 
 # KOVAS — Remotion motion graphics
 
-> Milestone-3 capability. The Remotion project lives at `kovas/remotion`
-> (templates: `CueTitleCard`, `LowerThird`). React in → alpha PNG / MP4 out.
+> Milestone-3 capability. The Remotion project lives at `kovas/remotion`.
+> Templates: `CueTitleCard`, `LowerThird`, `CueReel` (all cues → one reel),
+> `EndCredits` (crawl). React in → alpha PNG / MP4 out. Brand kit (fonts +
+> palette) is centralized in `src/brand.ts` and renders **offline** by default.
 
 ## When to use
 KOVAS asks for a **title card**, **lower-third**, end-credit, or a small
@@ -31,6 +33,17 @@ KOVAS asks for a **title card**, **lower-third**, end-credit, or a small
    ```
 3. On a headless box add `--browser-executable=<chrome-headless-shell>`; on the
    M1 run `npx remotion browser ensure` once.
+
+### Whole CUES.md in one pass
+Export the cue list to JSON shaped like `src/props/cue-list.json`
+(`{ show, episode, composer, accent, cues: [{cueNumber, cueTitle}] }`), then:
+```bash
+# one reel of all cue cards / an end-credit crawl
+npx remotion render CueReel    ~/renders/reel.mp4    --props=/path/cue-list.json
+npx remotion render EndCredits ~/renders/credits.mp4 --props=/path/cue-list.json
+# or one card PNG per cue
+node scripts/render-cue-cards.mjs /path/cue-list.json ~/renders/cards
+```
 
 ## Guardrails (Phase 1)
 - **Renders are WRITES.** The studio is read-only in Phase 1, so write outputs
